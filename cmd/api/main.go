@@ -1,5 +1,16 @@
 package main
 
 func main() {
-	// Start the server
+	cfg := config{
+		addr: ":4000",
+	}
+
+	app := &application{
+		config: cfg,
+	}
+
+	mux := app.mount()
+
+	app.run(mux)
+
 }
