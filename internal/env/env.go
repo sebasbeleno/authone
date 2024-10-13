@@ -14,7 +14,7 @@ func GetString(key string, fallback string) string {
 	return value
 }
 
-func getBool(key string, fallback bool) bool {
+func GetBool(key string, fallback bool) bool {
 	value := os.Getenv(key)
 	if value == "" {
 		return fallback
@@ -23,7 +23,7 @@ func getBool(key string, fallback bool) bool {
 	return value == "true"
 }
 
-func getInt(key string, fallback int) int {
+func GetInt(key string, fallback int) int {
 	value := os.Getenv(key)
 	if value == "" {
 		return fallback
