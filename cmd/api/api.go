@@ -39,6 +39,10 @@ func (app *application) mount() http.Handler {
 	// processing should be stopped.
 	router.Use(middleware.Timeout(60 * time.Second))
 
+	router.Route("/v1", func(r chi.Router) {
+		r.Get("/health", app.healthHandler)
+	})
+
 	return router
 
 }
