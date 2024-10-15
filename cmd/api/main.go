@@ -7,6 +7,7 @@ import (
 	"github.com/sebasbeleno/authone/internal/db"
 	"github.com/sebasbeleno/authone/internal/env"
 	"github.com/sebasbeleno/authone/internal/store"
+	"github.com/sebasbeleno/authone/internal/token"
 )
 
 func main() {
@@ -24,6 +25,7 @@ func main() {
 			maxIdleConns: env.GetInt("DB_MAX_IDLE_CONNS", 30),
 			maxIddleTime: env.GetString("DB_MAX_IDLE_TIME", "15m"),
 		},
+		tokenMaker: token.NewJWTMaker(env.GetString("TOKEN_SECRET", "012345678901234567890123456789")),
 	}
 
 	db, err := db.NewDB(cfg.db.addr, cfg.db.maxOpenConns, cfg.db.maxIdleConns, cfg.db.maxIddleTime)

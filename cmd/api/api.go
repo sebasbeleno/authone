@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/sebasbeleno/authone/internal/store"
+	"github.com/sebasbeleno/authone/internal/token"
 )
 
 type application struct {
@@ -24,8 +25,9 @@ type dbConfig struct {
 }
 
 type config struct {
-	addr string
-	db   dbConfig
+	addr       string
+	db         dbConfig
+	tokenMaker *token.JWTMaker
 }
 
 func (app *application) mount() http.Handler {
@@ -54,6 +56,7 @@ func (app *application) mount() http.Handler {
 
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/signup", app.signUpUserWithEmailAddress)
+			r.Post("/signin", app.signInUserWithEmailAndPassword)
 		})
 	})
 
