@@ -6,16 +6,34 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // TODO: DEFINE THE User STRUCT
 type User struct {
-	UserId       uuid.UUID
-	EmailAddress string
-	PasswordHash string
-	PasswordSalt string
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
+	UserId       uuid.UUID `json:"user_id"`
+	EmailAddress string    `json:"email_address"`
+	PasswordHash password  `json:"-"`
+	CreatedAt    time.Time `json:"created_at"`
+	UpdatedAt    time.Time `json:"updated_at"`
+}
+
+type password struct {
+	text *string
+	hash []byte
+}
+
+func (p *password) Set(plainText string) error {
+	hash, err := bcrypt.GenerateFromPassword([]byte(plainText), bcrypt.DefaultCost)
+
+	if err != nil {
+		return err
+	}
+
+	p.text = &plainText
+	p.hash = hash
+
+	return nil
 }
 
 type UserStore struct {
@@ -24,8 +42,9 @@ type UserStore struct {
 
 func (s *UserStore) Create(ctx context.Context, user *User) error {
 	query := `
-		INSERT INTO users (user_id, email_address, password_hash, password_salt, created_at, updated_at)
-		VALUES ($1, $2, $3, $4, $5, $6) RETURNING user_id, created_at
+		INSERT INTO auth.users (email_address, password_hash)
+		VALUES ($1, $2)
+		RETURNING user_id, created_at
 	`
 
 	ctx, cancel := context.WithTimeout(ctx, QueryTimeoutDuration)
@@ -34,15 +53,14 @@ func (s *UserStore) Create(ctx context.Context, user *User) error {
 	err := s.db.QueryRowContext(
 		ctx,
 		query,
-		user.UserId,
 		user.EmailAddress,
-		user.PasswordHash,
-		user.PasswordSalt,
-	).Scan(&user.UserId, &user.CreatedAt)
+		user.PasswordHash.hash,
+	).Scan(
+		&user.UserId,
+		&user.CreatedAt,
+	)
 
 	if err != nil {
-		// TODO: Handle error
-
 		return err
 	}
 
