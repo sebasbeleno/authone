@@ -58,6 +58,14 @@ func (app *application) mount() http.Handler {
 			r.Post("/signup", app.signUpUserWithEmailAddress)
 			r.Post("/signin", app.signInUserWithEmailAndPassword)
 		})
+
+		r.Group(func(r chi.Router) {
+			r.Use(GetAuthMiddlewareFunc(app.config.tokenMaker))
+
+			r.Route("/token", func(r chi.Router) {
+				r.Post("/refresh", app.healthHandler)
+			})
+		})
 	})
 
 	return router
